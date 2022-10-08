@@ -1,4 +1,4 @@
-# -api---
+# -开机自启动的权限维持---
 \HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run  windows开机自启动键值
 RegCreateKeyEx windows给我们提供的注册表操作api
 
