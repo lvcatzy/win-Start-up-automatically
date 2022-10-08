@@ -1,0 +1,65 @@
+#include<iostream>
+#include <windows.h>
+#include <sys/types.h>  
+#include <sys/stat.h>
+#include<string>
+
+using namespace std;
+
+void createStringReg(HKEY hRoot, char* szSubKey, char* valueName, char* Data);
+
+void addToAuto(string filePath);
+
+string getFileNameByFilePath(string filePath);
+
+void addToAuto(string filePath) {
+    string name = getFileNameByFilePath(filePath);
+    createStringReg(HKEY_LOCAL_MACHINE, (char*)"Software\\Microsoft\\Windows\\CurrentVersion\\Run", (char*)name.c_str(), (char*)filePath.c_str());
+}
+
+
+void createStringReg(HKEY hRoot, char* szSubKey, char* valueName, char* Data)
+{
+    HKEY hKey;
+    //打开注册表键，不存在则创建它
+    long lRet = RegCreateKeyEx(hRoot, szSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL);
+    if (lRet != ERROR_SUCCESS)
+    {
+        show("不存在该注册表键值");
+        return;
+    }
+
+    //修改注册表键值，没有则创建它
+    lRet = RegSetValueEx(hKey, valueName, 0, REG_SZ, (BYTE*)Data, strlen(Data));
+    if (lRet != ERROR_SUCCESS)
+    {
+        printf("创建注册表键值");
+        return;
+    }
+    RegCloseKey(hKey);
+}
+
+string getFileNameByFilePath(string filePath) {
+    int pos = filePath.find_last_of('\\');
+    return filePath.substr(pos + 1);
+}
+void showError()
+{
+    LPVOID lpMsgBuf;
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER
+        | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        GetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language  
+        (LPTSTR)&lpMsgBuf,
+        0,
+        NULL
+    );
+    // Process any inserts in lpMsgBuf.  
+    // ...  
+    // Display the string.  
+    MessageBox(NULL, (LPCTSTR)lpMsgBuf, ("Error"), MB_OK | MB_ICONINFORMATION);
+    // Free the buffer.  
+    LocalFree(lpMsgBuf);
+}
